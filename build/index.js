@@ -115,7 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      websocket.onopen = function () {
 	        _this.logging('Websocket connected');
-					if (typeof _this.props.onOpen !== 'undefined') _this.props.onOpen();
+	        if (typeof _this.props.onOpen === 'function') _this.props.onOpen();
 	      };
 
 	      websocket.onmessage = function (evt) {
@@ -125,9 +125,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.shouldReconnect = this.props.reconnect;
 	      websocket.onclose = function () {
 	        _this.logging('Websocket disconnected');
+	        if (typeof _this.props.onClose === 'function') _this.props.onClose();
 	        if (_this.shouldReconnect) {
 	          var time = _this.generateInterval(_this.state.attempts);
-	          setTimeout(function () {
+	          _this.timeoutID = setTimeout(function () {
 	            _this.setState({ attempts: _this.state.attempts + 1 });
 	            _this.setState({ ws: new WebSocket(_this.props.url, _this.props.protocol) });
 	            _this.setupWebsocket();
@@ -144,6 +145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'componentWillUnmount',
 	    value: function componentWillUnmount() {
 	      this.shouldReconnect = false;
+	      clearTimeout(this.timeoutID);
 	      var websocket = this.state.ws;
 	      websocket.close();
 	    }
